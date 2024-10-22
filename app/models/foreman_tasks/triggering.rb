@@ -38,6 +38,7 @@ module ForemanTasks
                                :if => proc { |t| t.recurring? && t.input_type == :monthly } }
     validate :can_start_recurring, :if => :recurring?
     validate :can_start_future, :if => :future?
+    validate :start_at_is_not_past
 
     def self.new_from_params(params = {})
       new(params.except(:mode, :start_at, :start_before)).tap do |triggering|
@@ -95,7 +96,6 @@ module ForemanTasks
 
     def parse_start_at!
       self.start_at ||= Time.zone.parse(start_at_raw) if start_at_raw.present?
-      errors.add(:start_at, _('is in the past')) if self.start_at < Time.zone.now
     end
 
     def parse_start_at
@@ -122,5 +122,10 @@ module ForemanTasks
       parse_start_at!
       errors.add(:start_before_raw, _('The task could not be started')) if !start_before.nil? && start_before < start_at
     end
+
+    def start_at_is_not_past
+      errors.add(:start_at, _('is in the past')) if !start_at.nil? && Time.zone.parse(start_at_raw) < Time.zone.now
+    end
   end
 end
+future
