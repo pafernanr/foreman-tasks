@@ -95,6 +95,7 @@ module ForemanTasks
 
     def parse_start_at!
       self.start_at ||= Time.zone.parse(start_at_raw) if start_at_raw.present?
+      errors.add(:start_at, _('is in the past')) if self.start_at < Time.zone.now
     end
 
     def parse_start_at
